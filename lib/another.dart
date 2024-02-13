@@ -12,14 +12,14 @@ import 'package:thermal1/header.dart';
 import 'package:thermal1/utils/extra.dart';
 import 'package:thermal1/utils/snackbar.dart';
 
-class ScanScreen extends StatefulWidget {
-  const ScanScreen({Key? key}) : super(key: key);
+class ScanScreen10 extends StatefulWidget {
+  const ScanScreen10({Key? key}) : super(key: key);
 
   @override
-  State<ScanScreen> createState() => _ScanScreenState();
+  State<ScanScreen10> createState() => _ScanScreen10State();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanScreen10State extends State<ScanScreen10> {
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   bool _isScanning = false;
@@ -251,10 +251,10 @@ void printWithDevice(BluetoothDevice device) async {
   // await printHeader1(gen, printer);
 //Array data with one single data
   Map<String, dynamic> singleData = {
-    // 'A/C No': 1056267460001,
-    // 'A/C title': '123456789012333333',
-    //'Available Balance': '224,358.56',
-    // 'Date': '21 jan 2024',
+    'A/C No': 1056267460001,
+    'A/C title': '123456789012333333',
+    'Available Balance': '224,358.56',
+    'Date': '21 jan 2024',
   };
 
   singleData.forEach((key, value) {
@@ -265,7 +265,7 @@ void printWithDevice(BluetoothDevice device) async {
     printer.add(gen.row([
       // PosColumn(
       //   text: '',
-      //   width: 0,
+      //   width: 1,
       // ),
       PosColumn(
         text: formattedKeyLines[0],
@@ -273,7 +273,7 @@ void printWithDevice(BluetoothDevice device) async {
       ),
       PosColumn(
         text: formattedLines[0],
-        width: 7,
+        width: 9,
       ),
     ]));
 
@@ -293,7 +293,7 @@ void printWithDevice(BluetoothDevice device) async {
         ),
         PosColumn(
           text: ' ${formattedLines.length > count ? formattedLines[i] : ''}',
-          width: 7,
+          width: 9,
         ),
       ]));
 
@@ -301,15 +301,15 @@ void printWithDevice(BluetoothDevice device) async {
     }
   });
 
-  // printer.add(gen.text('==============================',
-  //     styles: const PosStyles(align: PosAlign.center)));
+  printer.add(gen.text('==============================',
+      styles: const PosStyles(align: PosAlign.center)));
 
   List<Map<String, dynamic>> dataArray = [
     {
-      //  'Trn Date': '07 Feb 2024',
-      //  'Trn Amount': 'BDT 50,000.00',
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
       'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-      //  'Type': 'DEBIT',
+      'Type': 'DEBIT',
     },
     // {
     //   'Trn Date': '07 Feb 2024',
@@ -384,7 +384,7 @@ void printWithDevice(BluetoothDevice device) async {
         ),
         PosColumn(
           text: formattedLines[0],
-          width: 7,
+          width: 9,
         ),
       ]));
 
@@ -404,7 +404,7 @@ void printWithDevice(BluetoothDevice device) async {
           ),
           PosColumn(
             text: ' ${formattedLines.length > count ? formattedLines[i] : ''}',
-            width: 7,
+            width: 9,
           ),
         ]));
 

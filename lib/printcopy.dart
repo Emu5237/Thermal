@@ -12,14 +12,14 @@ import 'package:thermal1/header.dart';
 import 'package:thermal1/utils/extra.dart';
 import 'package:thermal1/utils/snackbar.dart';
 
-class ScanScreen extends StatefulWidget {
-  const ScanScreen({Key? key}) : super(key: key);
+class thermalprinter extends StatefulWidget {
+  const thermalprinter({Key? key}) : super(key: key);
 
   @override
-  State<ScanScreen> createState() => _ScanScreenState();
+  State<thermalprinter> createState() => _thermalprinterState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _thermalprinterState extends State<thermalprinter> {
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   bool _isScanning = false;
@@ -248,31 +248,28 @@ void printWithDevice(BluetoothDevice device) async {
   final gen = Generator(PaperSize.mm58, await CapabilityProfile.load());
   final printer = BluePrint();
   //await printHeader(gen, printer);
-  // await printHeader1(gen, printer);
-//Array data with one single data
+  await printHeader1(gen, printer);
+
+//Array data with one single data (Mini Statement)
   Map<String, dynamic> singleData = {
-    // 'A/C No': 1056267460001,
-    // 'A/C title': '123456789012333333',
-    //'Available Balance': '224,358.56',
-    // 'Date': '21 jan 2024',
+    'A/C No': 1056267460001,
+    'A/C title': '123456789012333333',
+    'Available Balance': '224,358.56',
+    'Date': '21 jan 2024',
   };
 
   singleData.forEach((key, value) {
     List<String> formattedKeyLines =
         getFormattedString(key.toString(), 11).split('\n');
     List<String> formattedLines =
-        getFormattedString(':$value'.toString(), 17).split('\n');
+        getFormattedString(value.toString(), 16).split('\n');
     printer.add(gen.row([
-      // PosColumn(
-      //   text: '',
-      //   width: 0,
-      // ),
       PosColumn(
-        text: formattedKeyLines[0],
+        text: ' ${formattedKeyLines[0]}',
         width: 5,
       ),
       PosColumn(
-        text: formattedLines[0],
+        text: ': ${formattedLines[0]}',
         width: 7,
       ),
     ]));
@@ -283,16 +280,14 @@ void printWithDevice(BluetoothDevice device) async {
         i < findLengthOfLargerArray(formattedLines, formattedKeyLines);
         i++) {
       printer.add(gen.row([
-        // PosColumn(
-        //   text: '',
-        //   width: 1,
-        // ),
         PosColumn(
-          text: formattedKeyLines.length > count ? formattedKeyLines[i] : '',
+          text: formattedKeyLines.length > count
+              ? ' ${formattedKeyLines[i]}'
+              : '',
           width: 5,
         ),
         PosColumn(
-          text: ' ${formattedLines.length > count ? formattedLines[i] : ''}',
+          text: formattedLines.length > count ? '  ${formattedLines[i]}' : '',
           width: 7,
         ),
       ]));
@@ -301,70 +296,70 @@ void printWithDevice(BluetoothDevice device) async {
     }
   });
 
-  // printer.add(gen.text('==============================',
-  //     styles: const PosStyles(align: PosAlign.center)));
+  printer.add(gen.text('==============================',
+      styles: const PosStyles(align: PosAlign.center)));
 
   List<Map<String, dynamic>> dataArray = [
     {
-      //  'Trn Date': '07 Feb 2024',
-      //  'Trn Amount': 'BDT 50,000.00',
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
       'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-      //  'Type': 'DEBIT',
+      'Type': 'DEBIT',
     },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'DPS Installment to 3056267460001',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'DPS Installment to 3056267460001',
-    //   'Type': 'CREDIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'EFT/IC/AB-BANK/INDINC/FRINC',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/CDWD/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
-    // {
-    //   'Trn Date': '07 Feb 2024',
-    //   'Trn Amount': 'BDT 50,000.00',
-    //   'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
-    //   'Type': 'DEBIT',
-    // },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'DPS Installment to 3056267460001',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'DPS Installment to 3056267460001',
+      'Type': 'CREDIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'EFT/IC/AB-BANK/INDINC/FRINC',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/CDWD/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
+    {
+      'Trn Date': '07 Feb 2024',
+      'Trn Amount': 'BDT 50,000.00',
+      'Particulars': 'AGB/FIFR/101505/TTTTT TTTT AAAA MMMM',
+      'Type': 'DEBIT',
+    },
   ];
 
   dataArray.asMap().forEach((index, data) {
@@ -372,18 +367,14 @@ void printWithDevice(BluetoothDevice device) async {
       List<String> formattedKeyLines =
           getFormattedString(key.toString(), 11).split('\n');
       List<String> formattedLines =
-          getFormattedString(':$value'.toString(), 17).split('\n');
+          getFormattedString(value.toString(), 16).split('\n');
       printer.add(gen.row([
-        // PosColumn(
-        //   text: '',
-        //   width: 1,
-        // ),
         PosColumn(
-          text: formattedKeyLines[0],
+          text: ' ${formattedKeyLines[0]}',
           width: 5,
         ),
         PosColumn(
-          text: formattedLines[0],
+          text: ': ${formattedLines[0]}',
           width: 7,
         ),
       ]));
@@ -394,16 +385,14 @@ void printWithDevice(BluetoothDevice device) async {
           i < findLengthOfLargerArray(formattedLines, formattedKeyLines);
           i++) {
         printer.add(gen.row([
-          // PosColumn(
-          //   text: '',
-          //   width: 1,
-          // ),
           PosColumn(
-            text: formattedKeyLines.length > count ? formattedKeyLines[i] : '',
+            text: formattedKeyLines.length > count
+                ? ' ${formattedKeyLines[i]}'
+                : '',
             width: 5,
           ),
           PosColumn(
-            text: ' ${formattedLines.length > count ? formattedLines[i] : ''}',
+            text: formattedLines.length > count ? '  ${formattedLines[i]}' : '',
             width: 7,
           ),
         ]));
@@ -412,80 +401,81 @@ void printWithDevice(BluetoothDevice device) async {
       }
     });
 
-    // printer.add(gen.text('==============================',
-    //     styles: const PosStyles(align: PosAlign.center)));
+    printer.add(gen.text('==============================',
+        styles: const PosStyles(align: PosAlign.center)));
   });
 
 // SINGLE
-// Map<String, dynamic> cashDeposit = {
-//     'Date': '07 Feb 2024 15:06',
-//     'Txn No.': '272036344067',
-//     'Txn Type': 'Cash Deposit',
-//     'A/C No.': '2056025810001',
-//     'A/C Title': '01882135394',
-//     'Amount': 'BDT 363,000.00',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> cashWithdrawal = {
-//     'Date': '07 Feb 2024 14:54',
-//     'Txn No.': '282051828371',
-//     'Txn Type': 'Cash Withdrawal',
-//     'A/C No.': '8888104367964001',
-//     'A/C Title': 'Taslima Yeasmin Emu',
-//     'Amount': 'BDT 300,000.00',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> loanInstallment = {
-//     'Date': '07 Feb 2024 14:44',
-//     'Txn No.': '01882135394',
-//     'Txn Type': 'Loan Installment',
-//     'Operating A/C': '8888104367964001',
-//     'Loan A/C No.': '6048230990003',
-//     'Loan A/C Title': 'ABCCCCCCCC Enterprise',
-//     'Amount': 'BDT 54,500.00',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> loanDisbursement = {
-//     'Date': '07 Feb 2024 12:42',
-//     'Txn No.': 353260786264,
-//     'Txn Type': 'Loan Disbursement',
-//     'Operating A/C': '1056267460001',
-//     'Loan A/C Title': 'ABCCCCCCCC Enterprise',
-//     'Withdrawal Amt.': 'BDT 300,000.00',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> creditCard = {
-//     'Date': '05 Feb 2024 17:20',
-//     'Txn No.': 461661436801,
-//     'Txn Type': 'Credit Card',
-//     'Card No.': '5488********1620',
-//     'Card Holder': 'undefined',
-//     'Distributor Code': 'F50',
-//     'Amount': 'BDT 45,000.00',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> Remittance = {
-//     'Date': '05 Feb 2024 17:20',
-//     'Txn No.': 215534971935,
-//     'Txn Type': 'F.Remittance',
-//     'Exchange House': 'Trans-Fast',
-//     'Sender Name': 'Taaaaaaaaasss Yassssssssss Emi',
-//     'Ben. Name': 'Emiiiiiiiii',
-//     'Ben Mobile': '01823552642',
-//     'Amount': 'BDT 20,670.40',
-//     'Status': 'Success'
-//   };
-//   Map<String, dynamic> branchCashDeposit = {
-//     'Date': '05 Feb 2024 11:20',
-//     'Txn No.': 924162052876,
-//     'Txn Type': 'Cash Deposit',
-//     'A/C No.': 1505203218138001,
-//     'A/C Title': 'Tasssssssssssss Emiiiiiiiiiiiii',
-//     'Amount': 'BDT 5,670.00',
-//     'Agent Fee': 'BDT 10.00',
-//     'Total Amount': 'BDT 5,670.00',
-//     'Status': 'Success'
-//   };
+
+  // Map<String, dynamic> cashDeposit = {
+  //   'Date': '07 Feb 2024 15:06',
+  //   'Txn No.': '272036344067',
+  //   'Txn Type': 'Cash Deposit',
+  //   'A/C No.': '2056025810001',
+  //   'A/C Title': '01882135394',
+  //   'Amount': 'BDT 363,000.00',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> cashWithdrawal = {
+  //   'Date': '07 Feb 2024 14:54',
+  //   'Txn No.': '282051828371',
+  //   'Txn Type': 'Cash Withdrawal',
+  //   'A/C No.': '8888104367964001',
+  //   'A/C Title': 'Taslima Yeasmin Emu',
+  //   'Amount': 'BDT 300,000.00',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> loanInstallment = {
+  //   'Date': '07 Feb 2024 14:44',
+  //   'Txn No.': '01882135394',
+  //   'Txn Type': 'Loan Installment',
+  //   'Operating A/C': '8888104367964001',
+  //   'Loan A/C No.': '6048230990003',
+  //   'Loan A/C Title': 'ABCCCCCCCC Enterprise',
+  //   'Amount': 'BDT 54,500.00',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> loanDisbursement = {
+  //   'Date': '07 Feb 2024 12:42',
+  //   'Txn No.': 353260786264,
+  //   'Txn Type': 'Loan Disbursement',
+  //   'Operating A/C': '1056267460001',
+  //   'Loan A/C Title': 'ABCCCCCCCC Enterprise',
+  //   'Withdrawal Amt.': 'BDT 300,000.00',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> creditCard = {
+  //   'Date': '05 Feb 2024 17:20',
+  //   'Txn No.': 461661436801,
+  //   'Txn Type': 'Credit Card',
+  //   'Card No.': '5488********1620',
+  //   'Card Holder': 'undefined',
+  //   'Distributor Code': 'F50',
+  //   'Amount': 'BDT 45,000.00',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> Remittance = {
+  //   'Date': '05 Feb 2024 17:20',
+  //   'Txn No.': 215534971935,
+  //   'Txn Type': 'F.Remittance',
+  //   'Exchange House': 'Trans-Fast',
+  //   'Sender Name': 'Taaaaaaaaasss Yassssssssss Emi',
+  //   'Ben. Name': 'Emiiiiiiiii',
+  //   'Ben Mobile': '01823552642',
+  //   'Amount': 'BDT 20,670.40',
+  //   'Status': 'Success'
+  // };
+  // Map<String, dynamic> branchCashDeposit = {
+  //   'Date': '05 Feb 2024 11:20',
+  //   'Txn No.': 924162052876,
+  //   'Txn Type': 'Cash Deposit',
+  //   'A/C No.': 1505203218138001,
+  //   'A/C Title': 'Tasssssssssssss Emiiiiiiiiiiiii',
+  //   'Amount': 'BDT 5,670.00',
+  //   'Agent Fee': 'BDT 10.00',
+  //   'Total Amount': 'BDT 5,670.00',
+  //   'Status': 'Success'
+  // };
   // Map<String, dynamic> data1 = {
   //   'Date no very much threeee': '21 jan 2024 January February December, 2023',
   //   'Txn No jani na kichui vai': '123456789012333333',
@@ -497,27 +487,24 @@ void printWithDevice(BluetoothDevice device) async {
   //   'StatussssssssssssssssssssssssPPPPPPPPRRRRRRwwwwwwwwww':
   //       'success failure jani na vai onk kichu',
   //   'A/C Noo': '888888 9999999 200000 30000',
-  //   'A/C Titlee': 'abc defgh ijktlon erdsaf',
+  //   'Particulars': 'abc defgh ijktlon erdsaf',
   // };
 
-  // data1.forEach((key, value) {
+  // branchCashDeposit.forEach((key, value) {
   //   List<String> formattedKeyLines =
-  //       getFormattedString(key.toString(), 10).split('\n');
+  //       getFormattedString(key.toString(), 11).split('\n');
   //   List<String> formattedLines =
-  //       getFormattedString(':$value'.toString(), 18).split('\n');
+  //       getFormattedString(value.toString(), 16).split('\n');
   //   printer.add(gen.row([
   //     PosColumn(
-  //       text: formattedKeyLines[0],
-  //       width: 4,
+  //       text: ' ${formattedKeyLines[0]}',
+  //       width: 5,
   //     ),
   //     PosColumn(
-  //       text: formattedLines[0],
-  //       width: 8,
+  //       text: ': ${formattedLines[0]}',
+  //       width: 7,
   //     ),
   //   ]));
-
-  //   print(
-  //       'key array ${formattedKeyLines.length > 100 ? formattedKeyLines[100] : ''}');
 
   //   int count = 1;
 
@@ -526,19 +513,22 @@ void printWithDevice(BluetoothDevice device) async {
   //       i++) {
   //     printer.add(gen.row([
   //       PosColumn(
-  //         text: formattedKeyLines.length > count ? formattedKeyLines[i] : '',
-  //         width: 4,
+  //         text: formattedKeyLines.length > count
+  //             ? ' ${formattedKeyLines[i]}'
+  //             : '',
+  //         width: 5,
   //       ),
   //       PosColumn(
-  //         text: ' ${formattedLines.length > count ? formattedLines[i] : ''}',
-  //         width: 8,
+  //         text: formattedLines.length > count ? '  ${formattedLines[i]}' : '',
+  //         width: 7,
   //       ),
   //     ]));
 
   //     count++;
   //   }
   // });
-  // await printfooter1(gen, printer);
+
+  await printfooter1(gen, printer);
   // await printfooter(gen, printer);
   printer.add(gen.feed(1));
   await printer.printData(device);
