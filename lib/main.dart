@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:thermal1/abar.dart';
-import 'package:thermal1/abarCopy.dart';
+import 'package:thermal1/abar1234.dart';
 import 'package:thermal1/abarabar.dart';
 import 'package:thermal1/bluetooth_off_screen.dart';
+import 'package:thermal1/english1.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
@@ -52,7 +52,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   @override
   Widget build(BuildContext context) {
     Widget screen = _adapterState == BluetoothAdapterState.on
-        ? thermalprinter20()
+        ? thermalprinter207()
         : BluetoothOffScreen(adapterState: _adapterState);
 
     return MaterialApp(

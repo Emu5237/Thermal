@@ -1,203 +1,682 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:ui' as ui;
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:image/image.dart';
-import 'package:image/image.dart' as img;
-import 'package:thermal1/blue_print.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
-import 'package:thermal1/device_screen.dart';
-import 'package:thermal1/utils/extra.dart';
-import 'package:thermal1/utils/snackbar.dart';
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:ui' as ui;
+// import 'dart:io';
+// import 'dart:ui';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+// import 'package:image/image.dart';
+// import 'package:image/image.dart' as img;
+// import 'package:thermal1/blue_print.dart';
+// import 'package:esc_pos_utils/esc_pos_utils.dart';
+// import 'package:thermal1/device_screen.dart';
+// import 'package:thermal1/utils/extra.dart';
+// import 'package:thermal1/utils/snackbar.dart';
+// import 'package:translator/translator.dart';
 
-class thermalprinter20 extends StatefulWidget {
-  const thermalprinter20({Key? key}) : super(key: key);
+// class thermalprinter20 extends StatefulWidget {
+//   const thermalprinter20({Key? key}) : super(key: key);
 
-  @override
-  State<thermalprinter20> createState() => _thermalprinter20State();
-}
+//   @override
+//   State<thermalprinter20> createState() => _thermalprinter20State();
+// }
 
-class _thermalprinter20State extends State<thermalprinter20> {
-  List<BluetoothDevice> _systemDevices = [];
-  List<ScanResult> _scanResults = [];
-  bool _isScanning = false;
-  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
-  late StreamSubscription<bool> _isScanningSubscription;
+// class _thermalprinter20State extends State<thermalprinter20> {
+//   List<BluetoothDevice> _systemDevices = [];
+//   List<ScanResult> _scanResults = [];
+//   bool _isScanning = false;
+//   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+//   late StreamSubscription<bool> _isScanningSubscription;
 
-  @override
-  void initState() {
-    super.initState();
+//   @override
+//   void initState() {
+//     super.initState();
 
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
-      _scanResults = results;
-      if (mounted) {
-        setState(() {
-          _scanResults = results;
-        });
-      }
-    }, onError: (e) {
-      Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
-    });
+//     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+//       _scanResults = results;
+//       if (mounted) {
+//         setState(() {
+//           _scanResults = results;
+//         });
+//       }
+//     }, onError: (e) {
+//       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
+//     });
 
-    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
-      _isScanning = state;
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
+//     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+//       _isScanning = state;
+//       if (mounted) {
+//         setState(() {});
+//       }
+//     });
+//   }
 
-  @override
-  void dispose() {
-    _scanResultsSubscription.cancel();
-    _isScanningSubscription.cancel();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _scanResultsSubscription.cancel();
+//     _isScanningSubscription.cancel();
+//     super.dispose();
+//   }
 
-  Future onScanPressed() async {
-    try {
-      _systemDevices = await FlutterBluePlus.systemDevices;
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("System Devices Error:", e),
-          success: false);
-    }
-    try {
-      int divisor = Platform.isAndroid ? 8 : 1;
-      await FlutterBluePlus.startScan(
-          timeout: const Duration(seconds: 15),
-          continuousUpdates: true,
-          continuousDivisor: divisor);
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
-          success: false);
-    }
-    if (mounted) {
-      setState(() {});
-    }
-  }
+//   Future onScanPressed() async {
+//     try {
+//       _systemDevices = await FlutterBluePlus.systemDevices;
+//     } catch (e) {
+//       Snackbar.show(ABC.b, prettyException("System Devices Error:", e),
+//           success: false);
+//     }
+//     try {
+//       int divisor = Platform.isAndroid ? 8 : 1;
+//       await FlutterBluePlus.startScan(
+//           timeout: const Duration(seconds: 15),
+//           continuousUpdates: true,
+//           continuousDivisor: divisor);
+//     } catch (e) {
+//       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
+//           success: false);
+//     }
+//     if (mounted) {
+//       setState(() {});
+//     }
+//   }
 
-  Future onStopPressed() async {
-    try {
-      FlutterBluePlus.stopScan();
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e),
-          success: false);
-    }
-  }
+//   Future onStopPressed() async {
+//     try {
+//       FlutterBluePlus.stopScan();
+//     } catch (e) {
+//       Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e),
+//           success: false);
+//     }
+//   }
 
-  void onConnectPressed(BluetoothDevice device) {
-    device.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.c, prettyException("Connect Error:", e),
-          success: false);
-    });
-    MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) => DeviceScreen(device: device),
-        settings: RouteSettings(name: '/DeviceScreen'));
-    Navigator.of(context).push(route);
-  }
+//   void onConnectPressed(BluetoothDevice device) {
+//     device.connectAndUpdateStream().catchError((e) {
+//       Snackbar.show(ABC.c, prettyException("Connect Error:", e),
+//           success: false);
+//     });
+//     MaterialPageRoute route = MaterialPageRoute(
+//         builder: (context) => DeviceScreen(device: device),
+//         settings: RouteSettings(name: '/DeviceScreen'));
+//     Navigator.of(context).push(route);
+//   }
 
-  Future onRefresh() {
-    if (_isScanning == false) {
-      FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
-    }
-    if (mounted) {
-      setState(() {});
-    }
-    return Future.delayed(Duration(milliseconds: 500));
-  }
+//   Future onRefresh() {
+//     if (_isScanning == false) {
+//       FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+//     }
+//     if (mounted) {
+//       setState(() {});
+//     }
+//     return Future.delayed(Duration(milliseconds: 500));
+//   }
 
-  Widget buildScanButton(BuildContext context) {
-    if (FlutterBluePlus.isScanningNow) {
-      return FloatingActionButton(
-        child: const Icon(Icons.stop),
-        onPressed: onStopPressed,
-        backgroundColor: Colors.red,
-      );
-    } else {
-      return FloatingActionButton(
-          child: const Text("SCAN"), onPressed: onScanPressed);
-    }
-  }
+//   Widget buildScanButton(BuildContext context) {
+//     if (FlutterBluePlus.isScanningNow) {
+//       return FloatingActionButton(
+//         child: const Icon(Icons.stop),
+//         onPressed: onStopPressed,
+//         backgroundColor: Colors.red,
+//       );
+//     } else {
+//       return FloatingActionButton(
+//           child: const Text("SCAN"), onPressed: onScanPressed);
+//     }
+//   }
 
-  Iterable<Container> scanTiles(BuildContext context) {
-    return _scanResults.map(
-      (e) {
-        return Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  printWithDevice(e.device);
-                },
-                child: Container(
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    children: [
-                      Text(e.device.platformName),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(e.device.remoteId.str),
-                    ],
-                  ),
-                ),
-              ),
-              Divider(),
-            ],
-          ),
-        );
-      },
-    );
-  }
+//   Iterable<Container> scanTiles(BuildContext context) {
+//     return _scanResults.map(
+//       (e) {
+//         return Container(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.start,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               GestureDetector(
+//                 onTap: () {
+//                   printWithDevice(e.device);
+//                 },
+//                 child: Container(
+//                   decoration:
+//                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
+//                   child: Column(
+//                     children: [
+//                       Text(e.device.platformName),
+//                       SizedBox(
+//                         height: 10,
+//                       ),
+//                       Text(e.device.remoteId.str),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//               Divider(),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      key: Snackbar.snackBarKeyB,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Find Devices'),
-        ),
-        body: RefreshIndicator(
-          onRefresh: onRefresh,
-          child: ListView(
-            children: <Widget>[
-              ...scanTiles(context),
-            ],
-          ),
-        ),
-        floatingActionButton: buildScanButton(context),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ScaffoldMessenger(
+//       key: Snackbar.snackBarKeyB,
+//       child: Scaffold(
+//         appBar: AppBar(
+//           title: const Text('Find Devices'),
+//         ),
+//         body: RefreshIndicator(
+//           onRefresh: onRefresh,
+//           child: ListView(
+//             children: <Widget>[
+//               ...scanTiles(context),
+//             ],
+//           ),
+//         ),
+//         floatingActionButton: buildScanButton(context),
+//       ),
+//     );
+//   }
+// }
+
+// String convertNumberToBengali(String number) {
+//   const Map<String, String> bengaliDigits = {
+//     '0': '০',
+//     '1': '১',
+//     '2': '২',
+//     '3': '৩',
+//     '4': '৪',
+//     '5': '৫',
+//     '6': '৬',
+//     '7': '৭',
+//     '8': '৮',
+//     '9': '৯',
+//     '.': '.',
+//     ',': ',',
+//   };
+
+//   return number.split('').map((e) => bengaliDigits[e] ?? e).join('');
+// }
+
+// String convertDateToBengali(String date) {
+//   const List<String> englishMonths = [
+//     'jan',
+//     'feb',
+//     'mar',
+//     'apr',
+//     'may',
+//     'jun',
+//     'jul',
+//     'aug',
+//     'sep',
+//     'oct',
+//     'nov',
+//     'dec'
+//   ];
+//   const List<String> bengaliMonths = [
+//     'জানুয়ারি',
+//     'ফেব্রুয়ারি',
+//     'মার্চ',
+//     'এপ্রিল',
+//     'মে',
+//     'জুন',
+//     'জুলাই',
+//     'আগস্ট',
+//     'সেপ্টেম্বর',
+//     'অক্টোবর',
+//     'নভেম্বর',
+//     'ডিসেম্বর'
+//   ];
+
+//   List<String> parts = date.split(' ');
+//   String day = convertNumberToBengali(parts[0]);
+//   String month = bengaliMonths[englishMonths.indexOf(parts[1].toLowerCase())];
+//   String year = convertNumberToBengali(parts[2]);
+
+//   String time = '';
+//   if (parts.length > 3) {
+//     List<String> timeParts = parts[3].split(':');
+//     String hours = convertNumberToBengali(timeParts[0]);
+//     String minutes = convertNumberToBengali(timeParts[1]);
+//     time = '$hours:$minutes';
+//   }
+
+//   if (time.isNotEmpty)
+//     return '$day $month $year $time';
+//   else
+//     return '$day $month $year';
+// }
+
+// String convertCurrencyToBengali(String amount) {
+//   String result = convertNumberToBengali(amount.replaceAll('BDT', '').trim());
+//   return '$result টাকা';
+// }
 
 // void printWithDevice(BluetoothDevice device) async {
 //   await device.connect();
 //   final gen = Generator(PaperSize.mm58, await CapabilityProfile.load());
 //   final printer = BluePrint();
+//   final ByteData data = await rootBundle.load('assets/ab3.png');
+//   final Uint8List bytes = data.buffer.asUint8List();
+//   final image22 = decodeImage(bytes);
+//   printer.add(gen.imageRaster(image22!));
+//   printer.add(gen.text('\n'));
 
-//   ////////////////////////////////////////////////////
-//   ///header
+//   bool isEnglish = false;
+
+// // 'BRAC BANK PLC\n============================\n(Duplicate Copy)\nBaroyarhat Agent Banking Outlet'
+//   ///header example one///
+//   await printSingleText(
+//       isEnglish
+//           ? 'BRAC BANK PLC\n============================\n(Duplicate Copy)\nBaroyarhat Agent Banking Outlet'
+//           : 'ব্র্যাক ব্যাংক পিএলসি\n===========================\n(ডুপ্লিকেট কপি)\nবারোইয়ারহাট এজেন্ট ব্যাংকিং আউটলেট',
+//       printer,
+//       gen);
+
+//   printer.add(gen.text('\n'));
+
+//   final Map<String, String> translations = {
+//     "Date": "তারিখ",
+//     "Txn No.": "লেনদেন নম্বর",
+//     "Txn Type": "লেনদেন প্রকার",
+//     "A/C No.": "একাউন্ট নাম্বার",
+//     "A/C Title": "একাউন্ট শিরোনাম",
+//     "Amount": "পরিমান",
+//     "Status": "অবস্থা",
+//     'Cash Deposit': "নগদ আমানত",
+//     'Cash Withdrawal': "নগদ উত্তোলন",
+//     'Loan Installment': "লোনের কিস্তি",
+//     'Success': "সফল",
+//     "Failure": "বিফল",
+//     'Agent Fee': 'এজেন্ট ফি',
+//     'Total Amount': 'মোট পরিমান',
+//     'Operating A/C': 'পরিচালিত একাউন্ট',
+//     'Loan A/C No.': 'লোন একাউন্ট নাম্বার',
+//     'Loan A/C Title': 'লোন একাউন্ট শিরোনাম',
+//     'Withdrawal Amt.': 'উত্তোলনের পরিমান',
+//     'Loan Disbursement': 'লোন বিতরণ',
+//     'Company Name': 'প্রতিষ্ঠানের নাম',
+//     'Distributor Code': 'পরিবেশক কোড',
+//     'Distributor Bill': 'পরিবেশক বিল',
+//     'Card No.': 'কার্ড নম্বর',
+//     'Card Holder': 'কার্ড ধারক',
+//     'Exchange House': 'বিনিময় ঘর',
+//     'Sender Name': 'প্রেরকের নাম',
+//     'Ben.Name': 'বেনিফিশিয়ারি নাম',
+//     'Ben Mobile': 'বেনিফিশিয়ারি মোবাইল নাম্বার',
+//     'Credit Card': 'ক্রেডিট কার্ড',
+//     'F.remittance': 'বৈদেশিক রেমিট্যান্স',
+//     'undefined': 'অনির্ধারিত',
+//     'Trans-Fast': 'ট্রান্স-ফাস্ট',
+//     'Trn Date': 'লেনদেনের তারিখ',
+//     'Trn Amount': 'লেনদেনের পরিমান',
+//     'Particulars': 'বিশেষ',
+//     'Type': 'প্রকার',
+//     'Available Balance': 'পর্যাপ্ত টাকা',
+//     'Account No': 'একাউন্ট নাম্বার',
+//     'Account Title': 'একাউন্ট শিরোনাম',
+//     'DEBIT': 'ডেবিট'
+//   };
+
+//   final translator = GoogleTranslator();
+//   //for title, using translate package
+
+//   var titleTranslationforCashDeposit =
+//       await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> cashDeposit = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Cash Deposit' : translations["Cash Deposit"]!,
+//       isEnglish ? "A/C No." : translations["A/C No."]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "A/C Title" : translations["A/C Title"]!:
+//           isEnglish ? "Taslima Yeasmin" : titleTranslationforCashDeposit.text,
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+//   var titleTranslationforCashWithdrawal =
+//       await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> cashWithdrawal = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Cash Withdrawal' : translations["Cash Withdrawal"]!,
+//       isEnglish ? "A/C No." : translations["A/C No."]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "A/C Title" : translations["A/C Title"]!: isEnglish
+//           ? "Taslima Yeasmin"
+//           : titleTranslationforCashWithdrawal.text,
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+//   var titleTranslationforLoanInstallment =
+//       await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> loanInstallment = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Loan Installment' : translations["Loan Installment"]!,
+//       isEnglish ? "Operating A/C" : translations["Operating A/C"]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "Loan A/C No." : translations["Loan A/C No."]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "Loan A/C Title" : translations["Loan A/C Title"]!: isEnglish
+//           ? "Taslima Yeasmin"
+//           : titleTranslationforLoanInstallment.text,
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+//   var titleTranslationforLoanDisbursement =
+//       await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> loanDisbursement = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Loan Disbursement' : translations["Loan Disbursement"]!,
+//       isEnglish ? "Operating A/C" : translations["Operating A/C"]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "Loan A/C Title" : translations["Loan A/C Title"]!: isEnglish
+//           ? "Taslima Yeasmin"
+//           : titleTranslationforLoanDisbursement.text,
+//       isEnglish ? "Withdrawal Amt." : translations["Withdrawal Amt."]!:
+//           isEnglish
+//               ? 'BDT 363,000.00'
+//               : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+
+//   var titleTranslationforDistributorBill =
+//       await translator.translate("Renata Feni", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> distributorBill = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 feb 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Distributor Bill' : translations["Distributor Bill"]!,
+//       isEnglish ? "Company Name" : translations["Company Name"]!:
+//           isEnglish ? "Renata Feni" : titleTranslationforDistributorBill.text,
+//       isEnglish ? "Distributor Code" : translations["Distributor Code"]!:
+//           isEnglish ? 'F50' : convertNumberToBengali('F50'),
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+//   // var titleTranslationforCreditCard =
+//   //     await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> creditCard = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Credit Card' : translations["Credit Card"]!,
+//       isEnglish ? "Card No." : translations["Card No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Card Holder" : translations["Card Holder"]!:
+//           isEnglish ? 'undefined' : translations["undefined"]!,
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+
+//   var titleTranslationforFremittance =
+//       await translator.translate("Taslima Yeasmin", from: 'en', to: 'bn');
+
+//   final List<Map<String, String>> remittance = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'F.remittance' : translations["F.remittance"]!,
+//       isEnglish ? "Exchange House" : translations["Exchange House"]!:
+//           isEnglish ? 'Trans-Fast' : translations["Trans-Fast"]!,
+//       isEnglish ? "Sender Name" : translations["Sender Name"]!:
+//           isEnglish ? "Taslima Yeasmin" : titleTranslationforFremittance.text,
+//       isEnglish ? "Ben.Name" : translations["Ben.Name"]!:
+//           isEnglish ? "Taslima Yeasmin" : titleTranslationforFremittance.text,
+//       isEnglish ? "Ben Mobile" : translations["Ben Mobile"]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Failure' : translations["Failure"]!
+//     }
+//   ];
+//   var titleTranslationforBranchCustomer =
+//       await translator.translate("Taslima Yeasmin Emi", from: 'en', to: 'bn');
+//   final List<Map<String, String>> branchCustomer = [
+//     {
+//       isEnglish ? "Date" : translations["Date"]!: isEnglish
+//           ? '07 Jan 2024 15:06'
+//           : convertDateToBengali('07 Jan 2024 15:06'),
+//       isEnglish ? "Txn No." : translations["Txn No."]!: isEnglish
+//           ? '888836748930029828'
+//           : convertNumberToBengali('888836748930029828'),
+//       isEnglish ? "Txn Type" : translations["Txn Type"]!:
+//           isEnglish ? 'Loan Installment' : translations["Loan Installment"]!,
+//       isEnglish ? "A/C No." : translations["A/C No."]!:
+//           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+//       isEnglish ? "A/C Title" : translations["A/C Title"]!: isEnglish
+//           ? "Taslima yeasmin emi"
+//           : titleTranslationforBranchCustomer.text,
+//       isEnglish ? "Amount" : translations["Amount"]!: isEnglish
+//           ? 'BDT 363,000.00'
+//           : convertCurrencyToBengali('BDT 363,000.00'),
+//       isEnglish ? "Total Amount" : translations["Total Amount"]!: isEnglish
+//           ? 'BDT 63,000.00'
+//           : convertCurrencyToBengali('BDT 63,000.00'),
+//       isEnglish ? "Agent Fee" : translations["Agent Fee"]!:
+//           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+//       isEnglish ? "Status" : translations["Status"]!:
+//           isEnglish ? 'Success' : translations["Success"]!
+//     }
+//   ];
+//   await printDualText(cashDeposit, printer, gen, false);
+//   // await printDualText(cashWithdrawal, printer, gen, false);
+//   // await printDualText(loanInstallment, printer, gen, false);
+//   // await printDualText(loanDisbursement, printer, gen, false);
+//   // await printDualText(distributorBill, printer, gen, false);
+//   // await printDualText(creditCard, printer, gen, false);
+//   // await printDualText(remittance, printer, gen, false);
+//   // await printDualText(branchCustomer, printer, gen, false);
+//   // await printDualText(branchCustomer, printer, gen, false);
+
+//   printer.add(gen.text('\n'));
+//   printer.add(gen.text('********************************'));
+//   printer.add(gen.text('\n'));
+//   printer.add(gen.qrcode('taslimaemi038@gmail.com'));
+//   await printSingleText(
+//       isEnglish
+//           ? '\nCustomer Copy\nThank You | Agent Banking'
+//           : '\nগ্রাহক কপি\nধন্যবাদ । এজেন্ট ব্যাংকিং',
+//       printer,
+//       gen);
+//   printer.add(gen.text('\n\n\n'));
+
+//   ///array print///
+
+// //   var titleTranslationforMiniStatement =
+// //       await translator.translate("Taslima Yeasmin Emi", from: 'en', to: 'bn');
+// //   final List<Map<String, String>> header = [
+// //     {
+// //       isEnglish ? "Account No" : translations["Account No"]!:
+// //           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+// //       isEnglish ? "Account Title" : translations["Account Title"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforMiniStatement.text,
+// //       isEnglish ? "Date" : translations["Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Available Balance" : translations["Available Balance"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //     },
+// //   ];
+// //   await printDualText(header, printer, gen, false);
+// //   printer.add(gen.text('==============================='));
+
+// //   final List<Map<String, String>> miniStatement = [
+// //     {
+// //       isEnglish ? "Trn Date" : translations["Trn Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Trn Amount" : translations["Trn Amount"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //       isEnglish ? "Particulars" : translations["Particulars"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforMiniStatement.text,
+// //       isEnglish ? "Type" : translations["Type"]!:
+// //           isEnglish ? 'DEBIT' : translations["DEBIT"]!,
+// //     },
+// //     {
+// //       isEnglish ? "Trn Date" : translations["Trn Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Trn Amount" : translations["Trn Amount"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //       isEnglish ? "Particulars" : translations["Particulars"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforMiniStatement.text,
+// //       isEnglish ? "Type" : translations["Type"]!:
+// //           isEnglish ? 'DEBIT' : translations["DEBIT"]!,
+// //     },
+// //   ];
+// //   // await printDualText(miniStatement, printer, gen, true);
+// // //tran history
+// //   var titleTranslationforTranHistory =
+// //       await translator.translate("Taslima Yeasmin Emi", from: 'en', to: 'bn');
+// //   final List<Map<String, String>> header1 = [
+// //     {
+// //       isEnglish ? "Account No" : translations["Account No"]!:
+// //           isEnglish ? '2056025810001' : convertNumberToBengali('2056025810001'),
+// //       isEnglish ? "Account Title" : translations["Account Title"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforMiniStatement.text,
+// //       isEnglish ? "Date" : translations["Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Available Balance" : translations["Available Balance"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //     },
+// //   ];
+// //   await printDualText(header1, printer, gen, false);
+// //   printer.add(gen.text('==============================='));
+
+// //   final List<Map<String, String>> tranHistory = [
+// //     {
+// //       isEnglish ? "Trn Date" : translations["Trn Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Trn Amount" : translations["Trn Amount"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //       isEnglish ? "Particulars" : translations["Particulars"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforTranHistory.text,
+// //       isEnglish ? "Type" : translations["Type"]!:
+// //           isEnglish ? 'DEBIT' : translations["DEBIT"]!,
+// //     },
+// //     {
+// //       isEnglish ? "Trn Date" : translations["Trn Date"]!: isEnglish
+// //           ? '07 Jan 2024 15:06'
+// //           : convertDateToBengali('07 Jan 2024 15:06'),
+// //       isEnglish ? "Trn Amount" : translations["Trn Amount"]!:
+// //           isEnglish ? 'BDT 5,000.00' : convertCurrencyToBengali('BDT 5,000.00'),
+// //       isEnglish ? "Particulars" : translations["Particulars"]!: isEnglish
+// //           ? "Taslima yeasmin emi"
+// //           : titleTranslationforMiniStatement.text,
+// //       isEnglish ? "Type" : translations["Type"]!:
+// //           isEnglish ? 'DEBIT' : translations["DEBIT"]!,
+// //     },
+// //   ];
+// //   await printDualText(tranHistory, printer, gen, true);
+
+//   //footer///
+
+//   // printer.add(gen.qrcode('taslimaemi038@gmail.com'));
+
+//   // await printSingleText(
+//   //     '\nঅনুসন্ধানের জন্য কল করুন ১৬২২১ (২৪/৭ খোলা)\nধন্যবাদ । এজেন্ট ব্যাংকিং',
+//   //     printer,
+//   //     gen);
+//   // printer.add(gen.text('\n\n\n'));
+
+//   await printer.printData(device);
+//   device.disconnect();
+// }
+
+// Future<void> printSingleText(
+//     String text, BluePrint printer, Generator gen) async {
 //   final headerBuilder = ui.ParagraphBuilder(
 //     ui.ParagraphStyle(
-//       textAlign: TextAlign.center,
-//       fontSize: 20.0,
-//       textDirection: TextDirection.ltr,
-//     ),
+//         textAlign: TextAlign.center,
+//         fontSize: 23.0,
+//         textDirection: TextDirection.ltr,
+//         fontWeight: ui.FontWeight.w500),
 //   )
-//     ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-//     ..addText(
-//         'ব্র্যাক ব্যাংক পিএলসি (BRAC Bank PLC) বাংলাদেশের স্বায়ত্তশাসিত বাণিজ্যিক ব্যাংকগুলোর মধ্যে অন্যতম। এটি মূলত; বেসরকারি\n\n');
+//     ..pushStyle(ui.TextStyle(
+//         color: ui.Color(0xFF000000), fontWeight: ui.FontWeight.w500))
+//     ..addText(text);
 
 //   final header = headerBuilder.build();
 //   header.layout(ui.ParagraphConstraints(width: 350));
@@ -215,50 +694,41 @@ class _thermalprinter20State extends State<thermalprinter20> {
 //     final Uint8List pngBytesForHeader = byteDataForHeader.buffer.asUint8List();
 //     printer.add(gen.imageRaster(img.decodeImage(pngBytesForHeader)!,
 //         highDensityVertical: true));
-//     printer.add(gen.feed(1));
+//     printer.add(gen.feed(2));
+//   }
+// }
 
-//     ////////////////////////////////////////////////////////
+// Future<void> printDualText(List<Map<String, String>> textMaps,
+//     BluePrint printer, Generator gen, bool isMultiple) async {
+//   final paragraphWidth1 = 150.0; // Width for the first paragraph
+//   final paragraphWidth2 = 200.0; // Width for the second paragraph
 
-//     final cashDeposit = {
-//       // 'ক্যাশ ডিপোজিট': '১২৩৪৪৫৬৭৮৯০',
-//       // 'ডিজিটাল সোনার বাংলাদেশ': 'আমার সোনার বাংলাদেশ আমি তোমায় ভালোবাসি',
-//       // 'ট্রানজেকশন নং': 'আমার নাম তাসলিমা ইয়াসমিন ইমি',
-//       // 'এনআইডি নং': '৬৩৬৭৮৮৯২১',
-//       // 'ঠিকানা': 'শাহজাদপুর বাসতলা, গুলশান, ধাকা-১২১২',
-
-//       'স্ট্যাটাস': 'সাক্সেস',
-//       'এ/সি নম্বর': '১২৩৪৪৫৬৭৮৯০',
-//       'এ/সি শিরোনাম': '১২৩৪৪৫৬৭৮৯০',
-//       'উপলভ্য ব্যালেন্স': '১২৩৪৪৫,৬৭৮৯০.১২৩৪৪৫৬৭৮৯০',
-//       'তারিখ': '২১ জানুয়ারি ২০২৪',
-//     };
-
-//     final paragraphWidth1 = 150.0; // Width for the first paragraph
-//     final paragraphWidth2 = 200.0; // Width for the second paragraph
-
-//     for (final entry in cashDeposit.entries) {
+//   for (final textMap in textMaps) {
+//     for (final entry in textMap.entries) {
 //       final String key = entry.key;
 //       final String value = entry.value;
 
 //       final paragraphBuilder1 = ui.ParagraphBuilder(
 //         ui.ParagraphStyle(
-//           textAlign: TextAlign.left,
-//           fontSize: 20.0,
-//           textDirection: TextDirection.ltr,
-//         ),
+//             textAlign: TextAlign.left,
+//             fontSize: 23.0,
+//             textDirection: TextDirection.ltr,
+//             fontWeight: ui.FontWeight.w500),
 //       )
-//         ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-//         ..addText('$key :');
+//         ..pushStyle(ui.TextStyle(
+//             color: ui.Color(0xFF000000), fontWeight: ui.FontWeight.w500))
+//         ..addText('$key');
 
 //       final paragraphBuilder2 = ui.ParagraphBuilder(
 //         ui.ParagraphStyle(
-//           textAlign: TextAlign.left,
-//           fontSize: 20.0,
-//           textDirection: TextDirection.ltr,
-//         ),
+//             textAlign: TextAlign.left,
+//             fontSize: 23.0,
+//             textDirection: TextDirection.ltr,
+//             fontWeight: ui.FontWeight.w400),
 //       )
-//         ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-//         ..addText('$value');
+//         ..pushStyle(ui.TextStyle(
+//             color: ui.Color(0xFF000000), fontWeight: ui.FontWeight.w500))
+//         ..addText(' : $value');
 
 //       final paragraph1 = paragraphBuilder1.build();
 //       final paragraph2 = paragraphBuilder2.build();
@@ -269,7 +739,7 @@ class _thermalprinter20State extends State<thermalprinter20> {
 //       final recorder = ui.PictureRecorder();
 //       final canvas = Canvas(recorder);
 
-//       //get max paragraph height
+//       // Get max paragraph height
 //       final maxParagraphHeight = (paragraph1.height > paragraph2.height
 //           ? paragraph1.height
 //           : paragraph2.height);
@@ -281,6 +751,7 @@ class _thermalprinter20State extends State<thermalprinter20> {
 
 //       // Draw the second paragraph next to the first one
 //       canvas.translate(paragraphWidth1, 0);
+
 //       canvas.drawRect(Rect.fromLTWH(0, 0, paragraph2.width, maxParagraphHeight),
 //           Paint()..color = Colors.white);
 //       canvas.drawParagraph(paragraph2, Offset.zero);
@@ -296,223 +767,9 @@ class _thermalprinter20State extends State<thermalprinter20> {
 
 //         printer.add(gen.imageRaster(img.decodeImage(pngBytes)!,
 //             highDensityVertical: true));
-//         printer.add(gen.feed(1));
+//         printer.add(gen.feed(2));
 //       }
 //     }
-
-//     ////////////////////////////////////////////////////
-//     ///footer
-//     final footerBuilder = ui.ParagraphBuilder(
-//       ui.ParagraphStyle(
-//         textAlign: TextAlign.center,
-//         fontSize: 20.0,
-//         textDirection: TextDirection.ltr,
-//       ),
-//     )
-//       ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-//       ..addText('\n\nব্র্যাক ব্যাংক পিএলসি (BRAC Bank PLC)');
-
-//     final header = footerBuilder.build();
-//     header.layout(ui.ParagraphConstraints(width: 350));
-//     final recorder = ui.PictureRecorder();
-//     final canvas = Canvas(recorder);
-//     canvas.drawRect(Rect.fromLTWH(0, 0, header.width, header.height),
-//         Paint()..color = Colors.white);
-//     canvas.drawParagraph(header, Offset.zero);
-//     final picture = recorder.endRecording();
-//     final image =
-//         await picture.toImage(header.width.toInt(), header.height.toInt());
-//     final byteDataForFooter =
-//         await image.toByteData(format: ui.ImageByteFormat.png);
-//     if (byteDataForFooter != null) {
-//       final Uint8List pngBytesForFooter =
-//           byteDataForFooter.buffer.asUint8List();
-//       printer.add(gen.imageRaster(img.decodeImage(pngBytesForFooter)!,
-//           highDensityVertical: true));
-//       printer.add(gen.feed(1));
-
-//       ////////////////////////////////////////////////////////
-
-//       await printer.printData(device);
-//       device.disconnect();
-//     }
+//     if (isMultiple) printer.add(gen.text('==============================='));
 //   }
 // }
-
-void printWithDevice(BluetoothDevice device) async {
-  await device.connect();
-  final gen = Generator(PaperSize.mm58, await CapabilityProfile.load());
-  final printer = BluePrint();
-
-  ///header example one///
-  await printSingleText(
-      'ব্র্যাক ব্যাংক পিএলসি (BRAC Bank PLC) বাংলাদেশের স্বায়ত্তশাসিত বাণিজ্যিক ব্যাংকগুলোর মধ্যে অন্যতম\n\n',
-      printer,
-      gen);
-  printer.add(gen.text('\n'));
-
-  ///header example two///
-  final header = [
-    {
-      'স্ট্যাটাস': 'সাক্সেস',
-      'এ/সি নম্বর': '১২৩৪৪৫৬৭৮৯০',
-      'এ/সি শিরোনাম': '১২৩৪৪৫৬৭৮৯০',
-      'উপলভ্য ব্যালেন্স': '১২৩৪৪৫,৬৭৮৯০.১২৩৪৪৫৬৭৮৯০',
-      'তারিখ': '২১ জানুয়ারি ২০২৪',
-    }
-  ];
-
-  await printDualText(header, printer, gen, false);
-  printer.add(gen.text('\n'));
-
-  ///single print///
-  final cashDeposit = [
-    {
-      // 'স্ট্যাটাস': 'সাক্সেস',
-      // 'এ/সি নম্বর': '১২৩৪৪৫৬৭৮৯০',
-      // 'এ/সি শিরোনাম': '১২৩৪৪৫৬৭৮৯০',
-      // 'উপলভ্য ব্যালেন্স': '১২৩৪৪৫,৬৭৮৯০.১২৩৪৪৫৬৭৮৯০',
-      // 'তারিখ': '২১ জানুয়ারি ২০২৪',
-      'স্ট্যাটাস': 'সাক্সেস',
-      'এ/সি নম্বর': '১২৩৪৪৫৬৭৮৯০',
-      'এ/সি শিরোনাম': '১২৩৪৪৫৬৭৮৯০',
-      'উপলভ্য ব্যালেন্স': '১২৩৪৪৫,৬৭৮৯০.১২৩৪৪৫৬৭৮৯০',
-      'তারিখ': '২১ জানুয়ারি ২০২৪',
-    }
-  ];
-
-  // await printDualText(cashDeposit, printer, gen, false);
-
-  ///array print///
-  printer.add(gen.text('========================'));
-  List<Map<String, String>> cashDeposits = [
-    {
-      'ক্যাশ ডিপোজিট': '১২৩৪৪৫৬৭৮৯০',
-      'ডিজিটাল সোনার বাংলাদেশ': 'আমার সোনার বাংলাদেশ আমি তোমায় ভালোবাসি',
-      'ট্রানজেকশন নং': 'আমার নাম তাসলিমা ইয়াসমিন ইমি',
-      'এনআইডি নং': '৬৩৬৭৮৮৯২১',
-      'ঠিকানা': 'শাহজাদপুর বাসতলা, গুলশান, ধাকা-১২১২'
-    },
-    {
-      'স্ট্যাটাস': 'সাক্সেস',
-      'এ/সি নম্বর': '১২৩৪৪৫৬৭৮৯০',
-      'এ/সি শিরোনাম': '১২৩৪৪৫৬৭৮৯০',
-      'উপলভ্য ব্যালেন্স': '১২৩৪৪৫,৬৭৮৯০.১২৩৪৪৫৬৭৮৯০',
-      'তারিখ': '২১ জানুয়ারি ২০২৪',
-    }
-  ];
-
-  await printDualText(cashDeposits, printer, gen, true);
-
-  ///footer///
-  await printSingleText(
-      '\n\nব্র্যাক ব্যাংক পিএলসি (BRAC Bank PLC)', printer, gen);
-  printer.add(gen.text('\n\n\n'));
-  await printer.printData(device);
-  device.disconnect();
-}
-
-Future<void> printSingleText(
-    String text, BluePrint printer, Generator gen) async {
-  final headerBuilder = ui.ParagraphBuilder(
-    ui.ParagraphStyle(
-      textAlign: TextAlign.center,
-      fontSize: 20.0,
-      textDirection: TextDirection.ltr,
-    ),
-  )
-    ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-    ..addText(text);
-
-  final header = headerBuilder.build();
-  header.layout(ui.ParagraphConstraints(width: 350));
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
-  canvas.drawRect(Rect.fromLTWH(0, 0, header.width, header.height),
-      Paint()..color = Colors.white);
-  canvas.drawParagraph(header, Offset.zero);
-  final picture = recorder.endRecording();
-  final image =
-      await picture.toImage(header.width.toInt(), header.height.toInt());
-  final byteDataForHeader =
-      await image.toByteData(format: ui.ImageByteFormat.png);
-  if (byteDataForHeader != null) {
-    final Uint8List pngBytesForHeader = byteDataForHeader.buffer.asUint8List();
-    printer.add(gen.imageRaster(img.decodeImage(pngBytesForHeader)!,
-        highDensityVertical: true));
-    printer.add(gen.feed(2));
-  }
-}
-
-Future<void> printDualText(List<Map<String, String>> textMaps,
-    BluePrint printer, Generator gen, bool isMultiple) async {
-  final paragraphWidth1 = 150.0; // Width for the first paragraph
-  final paragraphWidth2 = 200.0; // Width for the second paragraph
-
-  for (final textMap in textMaps) {
-    for (final entry in textMap.entries) {
-      final String key = entry.key;
-      final String value = entry.value;
-
-      final paragraphBuilder1 = ui.ParagraphBuilder(
-        ui.ParagraphStyle(
-          textAlign: TextAlign.left,
-          fontSize: 20.0,
-          textDirection: TextDirection.ltr,
-        ),
-      )
-        ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-        ..addText('$key :');
-
-      final paragraphBuilder2 = ui.ParagraphBuilder(
-        ui.ParagraphStyle(
-          textAlign: TextAlign.left,
-          fontSize: 20.0,
-          textDirection: TextDirection.ltr,
-        ),
-      )
-        ..pushStyle(ui.TextStyle(color: ui.Color(0xFF000000)))
-        ..addText('$value');
-
-      final paragraph1 = paragraphBuilder1.build();
-      final paragraph2 = paragraphBuilder2.build();
-
-      paragraph1.layout(ui.ParagraphConstraints(width: paragraphWidth1));
-      paragraph2.layout(ui.ParagraphConstraints(width: paragraphWidth2));
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-
-      // Get max paragraph height
-      final maxParagraphHeight = (paragraph1.height > paragraph2.height
-          ? paragraph1.height
-          : paragraph2.height);
-
-      // Draw the first paragraph
-      canvas.drawRect(Rect.fromLTWH(0, 0, paragraph1.width, maxParagraphHeight),
-          Paint()..color = Colors.white);
-      canvas.drawParagraph(paragraph1, Offset.zero);
-
-      // Draw the second paragraph next to the first one
-      canvas.translate(paragraphWidth1, 0);
-      canvas.drawRect(Rect.fromLTWH(0, 0, paragraph2.width, maxParagraphHeight),
-          Paint()..color = Colors.white);
-      canvas.drawParagraph(paragraph2, Offset.zero);
-
-      final picture = recorder.endRecording();
-      final image = await picture.toImage(
-          (paragraphWidth1 + paragraphWidth2).toInt(),
-          maxParagraphHeight.toInt());
-
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData != null) {
-        final Uint8List pngBytes = byteData.buffer.asUint8List();
-
-        printer.add(gen.imageRaster(img.decodeImage(pngBytes)!,
-            highDensityVertical: true));
-        printer.add(gen.feed(2));
-      }
-    }
-    if (isMultiple) printer.add(gen.text('========================='));
-  }
-}
